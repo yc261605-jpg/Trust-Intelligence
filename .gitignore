@@ -1,0 +1,12 @@
+# 金鑰與密碼
+.env
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+# 執行時產生的資料（資料庫、技師上傳的照片），啟動時會自動重建
+data/
+uploads/
+*.db

@@ -1,0 +1,186 @@
+/* Trust Intelligence 果凍層（v4）
+   疊在 style.css 之後。重點：
+   1. 背景是模糊的真實照片，卡片是半透明「果凍玻璃」：白色高光邊、內陰影、柔和投影
+   2. 按鈕、分段、分級數字都是有光澤的果凍，按下會 Q 彈回彈
+   3. 動畫：卡片依序彈入、進度條液體流動、量尺指針滑入、金額跳動、底部列彈出
+   紅黃綠仍然只代表分級。 */
+
+:root {
+  --bg-photo: url("/static/img/hero_service_bay.jpg");
+  --jelly-card: rgba(255, 255, 255, .62);
+  --jelly-card-solid: rgba(255, 255, 255, .8);
+  --jelly-edge: rgba(255, 255, 255, .92);
+  --spring: cubic-bezier(.34, 1.56, .64, 1);
+  --soft: cubic-bezier(.2, .9, .3, 1);
+  --radius: 26px;
+}
+
+/* ---------- 背景：模糊照片＋淡色霧面 ---------- */
+body { background: #dfe5ec; }
+body::before, body::after { content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none; }
+body::before {
+  background: var(--bg-photo) center / cover no-repeat;
+  filter: blur(34px) saturate(1.5) brightness(1.02);
+  transform: scale(1.18);
+  transition: background-image .6s;
+}
+body::after {
+  z-index: -1;
+  background:
+    radial-gradient(120% 70% at 15% 0%, rgba(255, 255, 255, .55), transparent 60%),
+    radial-gradient(90% 60% at 100% 100%, rgba(255, 255, 255, .35), transparent 60%),
+    linear-gradient(180deg, rgba(236, 241, 246, .32), rgba(226, 232, 239, .5));
+}
+body.staff { --jelly-card: rgba(255, 255, 255, .74); }
+
+/* ---------- 果凍玻璃卡 ---------- */
+.card, .icard, .nochange, .modal {
+  background: var(--jelly-card);
+  border: 1px solid var(--jelly-edge);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .95),
+    inset 0 -10px 24px rgba(140, 160, 185, .10),
+    0 1px 2px rgba(20, 35, 55, .05),
+    0 14px 34px rgba(20, 35, 55, .12);
+  border-radius: var(--radius);
+}
+.icard { border-radius: 24px; }
+.modal { background: rgba(255, 255, 255, .86); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); }
+.nochange { box-shadow: inset 0 0 0 2px rgba(30, 107, 60, .22), inset 0 1px 0 #fff, 0 14px 34px rgba(20, 35, 55, .12); }
+
+/* 卡片內的次層：淡淡的果凍凹槽 */
+.note, .reason, .result, .item, .seg, .pick, .tabs, .input, select.input, textarea.input, .conv-body, .hand-list .h {
+  background: rgba(255, 255, 255, .5);
+  box-shadow: inset 0 1px 3px rgba(40, 60, 85, .12), inset 0 -1px 0 rgba(255, 255, 255, .8);
+  border-color: transparent;
+}
+.input:focus { background: rgba(255, 255, 255, .92); box-shadow: 0 0 0 4px rgba(37, 87, 167, .14), inset 0 1px 2px rgba(40, 60, 85, .08); }
+
+/* ---------- 果凍按鈕 ---------- */
+.btn, .seg button.on, .pick button.on, .tab.on, .chips button, .qchips .btn {
+  position: relative; isolation: isolate; overflow: hidden;
+}
+.btn {
+  border: 1px solid rgba(255, 255, 255, .95);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(255, 255, 255, .62));
+  box-shadow:
+    inset 0 -7px 12px rgba(120, 140, 165, .20),
+    inset 0 2px 2px #fff,
+    0 6px 16px rgba(30, 45, 65, .14);
+  transition: transform .5s var(--spring), box-shadow .2s, filter .2s;
+}
+.btn::before, .seg button.on::before, .tab.on::before, .chip::before, .pick button.on::before {
+  content: ""; position: absolute; left: 12%; right: 12%; top: 2px; height: 48%;
+  border-radius: 999px; pointer-events: none; z-index: -1;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .95), rgba(255, 255, 255, 0));
+}
+.btn:hover { filter: brightness(1.03); box-shadow: inset 0 -7px 12px rgba(120, 140, 165, .22), inset 0 2px 2px #fff, 0 10px 22px rgba(30, 45, 65, .18); }
+.btn:active { transform: scale(.92); transition-duration: .08s; }
+.btn.primary, .btn.dark {
+  color: #fff; border-color: rgba(255, 255, 255, .28);
+  background: linear-gradient(180deg, #56637a 0%, #222b38 55%, #121922 100%);
+  box-shadow:
+    inset 0 -10px 16px rgba(0, 0, 0, .38),
+    inset 0 1px 1px rgba(255, 255, 255, .55),
+    0 10px 24px rgba(15, 25, 40, .34);
+}
+.btn.primary::before, .btn.dark::before { left: 0; right: 0; top: 0; height: 100%; border-radius: inherit;
+  background: radial-gradient(120% 70% at 50% 0%, rgba(255, 255, 255, .2), rgba(255, 255, 255, 0) 60%); }
+.btn:disabled { opacity: .5; filter: saturate(.6); }
+
+/* 彈一下（JS 在按下時加上 .boing） */
+.boing { animation: boing .62s var(--spring); }
+@keyframes boing {
+  0% { transform: scale(1, 1); }
+  25% { transform: scale(1.1, .88); }
+  45% { transform: scale(.94, 1.07); }
+  65% { transform: scale(1.04, .97); }
+  85% { transform: scale(.99, 1.01); }
+  100% { transform: scale(1, 1); }
+}
+
+/* ---------- 分段（果凍滑塊） ---------- */
+.seg { border-radius: 20px; padding: 5px; }
+.seg button { border-radius: 16px; transition: color .2s, transform .5s var(--spring); }
+.seg button.on {
+  background: linear-gradient(180deg, #fff, rgba(255, 255, 255, .78));
+  box-shadow: inset 0 -5px 10px rgba(120, 140, 165, .18), inset 0 1px 1px #fff, 0 4px 12px rgba(30, 45, 65, .16);
+  animation: pop .5s var(--spring);
+}
+@keyframes pop { 0% { transform: scale(.9); } 60% { transform: scale(1.05); } 100% { transform: scale(1); } }
+.tabs { border-radius: 20px; }
+.tab { border-radius: 15px; transition: transform .4s var(--spring); }
+.tab.on { background: linear-gradient(180deg, #fff, rgba(255, 255, 255, .8)); box-shadow: inset 0 -5px 10px rgba(120, 140, 165, .18), 0 4px 12px rgba(30, 45, 65, .14); }
+.chips button { background: rgba(255, 255, 255, .7); box-shadow: inset 0 -3px 6px rgba(120, 140, 165, .16), 0 2px 6px rgba(30, 45, 65, .08); transition: transform .4s var(--spring); }
+.chips button:active { transform: scale(.92); }
+.pick { border-radius: 22px; }
+.pick button { border-radius: 17px; transition: transform .5s var(--spring); }
+.pick button.on { animation: pop .5s var(--spring); }
+
+/* ---------- 分級數字：軟糖 ---------- */
+.chip { position: relative; isolation: isolate; overflow: hidden; border-radius: 15px;
+  box-shadow: inset 0 -6px 10px rgba(0, 0, 0, .08), inset 0 1px 1px rgba(255, 255, 255, .9), 0 4px 10px rgba(20, 35, 55, .10); }
+.chip.immediate { background: linear-gradient(180deg, #fff1f0, #f8c9c5); color: var(--red); }
+.chip.deferrable { background: linear-gradient(180deg, #fff8e8, #f6dca2); color: var(--amber); }
+.chip.normal { background: linear-gradient(180deg, #eefaf1, #bfe5cb); color: var(--green); }
+.chip::before { height: 42%; }
+.badge { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), inset 0 -2px 4px rgba(0, 0, 0, .05); }
+.locked { background: linear-gradient(180deg, #fff1f0, #fbd9d6) !important; box-shadow: inset 0 1px 0 #fff, inset 0 -4px 8px rgba(180, 35, 24, .08); }
+
+/* ---------- 進度條：液體流動 ---------- */
+.pbar { background: rgba(255, 255, 255, .55); box-shadow: inset 0 1px 3px rgba(40, 60, 85, .18); height: 14px; border-radius: 8px; }
+.pbar span {
+  position: relative; overflow: hidden; border-radius: 8px;
+  background: linear-gradient(180deg, #5a6780, #1c2430);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, .5), inset 0 -3px 5px rgba(0, 0, 0, .3);
+  transition: width .9s var(--spring);
+}
+.pbar span::after {
+  content: ""; position: absolute; inset: 0;
+  background: repeating-linear-gradient(115deg, rgba(255, 255, 255, 0) 0 14px, rgba(255, 255, 255, .18) 14px 26px);
+  animation: flow 1.4s linear infinite;
+}
+@keyframes flow { to { background-position: 60px 0; } }
+
+/* ---------- 量尺指針滑入 ---------- */
+.gauge .track { height: 14px; border-radius: 8px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, .12); }
+.gauge .pin { width: 24px; height: 24px; animation: pinIn 1.1s var(--spring) both .25s;
+  box-shadow: inset 0 -3px 5px rgba(0, 0, 0, .25), inset 0 2px 2px rgba(255, 255, 255, .6), 0 3px 8px rgba(0, 0, 0, .3); }
+@keyframes pinIn { from { left: 100%; opacity: 0; } }
+
+/* ---------- 進場動畫 ---------- */
+.anim > * { animation: rise .75s var(--soft) both; animation-delay: calc(var(--i, 0) * 70ms); }
+@keyframes rise { from { opacity: 0; transform: translateY(22px) scale(.97); } }
+.slide-in > * { animation: slideIn .55s var(--soft) both; animation-delay: calc(var(--i, 0) * 60ms); }
+@keyframes slideIn { from { opacity: 0; transform: translateX(36px); } }
+.drop-in { animation: dropIn .8s var(--spring) both; animation-delay: calc(var(--i, 0) * 120ms + .2s); }
+@keyframes dropIn { 0% { opacity: 0; transform: translateY(-18px) scale(.6); } 100% { opacity: 1; transform: none; } }
+.pop-in { animation: pop .5s var(--spring); }
+
+/* 頂部列（技師端、管理平台） */
+.topbar { background: rgba(255, 255, 255, .55); border-bottom: 1px solid rgba(255, 255, 255, .85);
+  box-shadow: 0 8px 24px rgba(20, 35, 55, .08); }
+
+/* toast、modal 也彈 */
+.toast { animation: toastIn .55s var(--spring); }
+@keyframes toastIn { from { opacity: 0; transform: translateY(14px) scale(.9); } }
+.modal-bg { animation: fade .25s ease-out; }
+.modal { animation: modalIn .55s var(--spring); }
+@keyframes modalIn { from { opacity: 0; transform: translateY(30px) scale(.9); } }
+@keyframes fade { from { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+/* 技師端左側步驟：選中的是深色果凍 */
+.step { transition: transform .45s var(--spring), background .2s; }
+.step.on { position: relative; isolation: isolate; overflow: hidden;
+  background: linear-gradient(180deg, #56637a 0%, #222b38 55%, #121922 100%);
+  box-shadow: inset 0 -8px 14px rgba(0, 0, 0, .35), inset 0 1px 1px rgba(255, 255, 255, .5), 0 8px 18px rgba(15, 25, 40, .28); }
+.step:active { transform: scale(.97); }
+.order-card { transition: transform .5s var(--spring), box-shadow .2s; }
+.order-card:hover { transform: translateY(-3px) scale(1.01); }
+.shoot label { background: rgba(255, 255, 255, .45); border-color: rgba(120, 140, 165, .45); transition: transform .45s var(--spring); }
+.shoot label:hover { transform: scale(1.04); }
+.shoot img { box-shadow: 0 6px 16px rgba(20, 35, 55, .18); }

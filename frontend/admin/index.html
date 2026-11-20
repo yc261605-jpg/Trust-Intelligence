@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trust Intelligence｜管理平台</title>
+  <link rel="stylesheet" href="/shared/style.css">
+  <link rel="stylesheet" href="/shared/jelly.css">
+  <style>
+    .qr-box { text-align: center; }
+    .qr-box img.qr { width: 220px; height: 220px; margin: 0 auto; image-rendering: pixelated; }
+    .plate { display: inline-block; border: 1.5px solid var(--ink); border-radius: 8px; padding: 0 9px; font-weight: 800; letter-spacing: .05em; }
+    .hand { display: grid; grid-template-columns: 300px 1fr; gap: 16px; min-height: 520px; }
+    .hand-list .h { padding: 12px 14px; border-radius: 16px; cursor: pointer; margin-bottom: 8px; background: #f4f6f8; }
+    .hand-list .h.on { background: #fff; box-shadow: 0 0 0 2px var(--ink); }
+    .conv { display: flex; flex-direction: column; height: 560px; }
+    .conv-body { flex: 1; overflow-y: auto; background: #f4f6f8; border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+    .m { max-width: 80%; padding: 10px 13px; border-radius: 16px; font-size: 15px; white-space: pre-wrap; }
+    .m .who { font-size: 11px; color: var(--ink-3); font-weight: 700; margin-bottom: 2px; }
+    .m.customer { align-self: flex-start; background: #fff; box-shadow: var(--shadow); }
+    .m.agent { align-self: flex-start; background: #e6eaef; color: var(--ink-2); }
+    .m.staff { align-self: flex-end; background: var(--ink); color: #fff; }
+    .m.staff .who { color: #aeb3bd; }
+    .detail { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; }
+    .brief { background: var(--blue-bg); border-radius: 18px; padding: 18px; font-size: 16px; line-height: 1.85; }
+    .rem { display: grid; grid-template-columns: 120px 1fr 1.4fr; gap: 14px; align-items: center; padding: 12px 0; border-bottom: 1px solid #edf0f3; }
+    .line-bubble { background: #06c755; border-radius: 16px; padding: 8px; }
+    .line-bubble div { background: #fff; border-radius: 12px; padding: 8px 10px; font-size: 13px; }
+    tr.clickable { cursor: pointer; }
+    @media (max-width: 860px) { .hand, .detail, .rem { grid-template-columns: 1fr; } }
+    @media print { .topbar, .tabs, .no-print { display: none !important; } .card { box-shadow: none; } }
+  </style>
+</head>
+<body class="staff">
+  <header class="topbar">
+    <div id="brand"></div>
+    <div class="spacer"></div>
+    <span class="sub" id="llmStatus"></span>
+  </header>
+  <main class="wrap">
+    <nav class="tabs" id="tabs">
+      <button class="tab on" data-tab="reception">接待建單</button>
+      <button class="tab" data-tab="orders">工單與說明稿</button>
+      <button class="tab" data-tab="handoffs">轉接中心 <span class="count gray" id="hCount">0</span></button>
+      <button class="tab" data-tab="reminders">回廠提醒</button>
+      <button class="tab" data-tab="parts">零件與規則</button>
+      <button class="tab" data-tab="demo">示範工具</button>
+    </nav>
+    <section id="view"></section>
+  </main>
+  <script src="/shared/api.js"></script>
+  <script>document.getElementById("brand").innerHTML = brandHtml("管理平台");</script>
+  <script src="app.js"></script>
+</body>
+</html>

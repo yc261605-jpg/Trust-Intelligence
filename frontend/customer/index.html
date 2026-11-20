@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1b2129">
+  <title>Trust Intelligence｜我的愛車</title>
+  <link rel="stylesheet" href="/shared/style.css">
+  <link rel="stylesheet" href="/shared/jelly.css">
+  <link rel="stylesheet" href="customer.css">
+</head>
+<body>
+  <div class="shell">
+    <header id="hero" class="hero"></header>
+    <main id="app" class="body"></main>
+  </div>
+  <div id="dock"></div>
+
+  <!-- AI 服務專員 -->
+  <div id="chatBg" class="chat-bg hidden"></div>
+  <section id="chat" class="chat hidden" aria-label="AI 服務專員">
+    <div class="chat-grip"></div>
+    <div class="chat-head">
+      <div class="row"><span class="pulse"></span><div><b>AI 服務專員</b><div class="faint" id="chatSub">只根據本次工單與原廠規則回答</div></div></div>
+      <button class="btn sm" id="chatClose">關閉</button>
+    </div>
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-quick" id="chatQuick"></div>
+    <form class="chat-input" id="chatForm">
+      <input class="input" id="chatText" placeholder="輸入你的問題" autocomplete="off">
+      <button class="btn primary" type="submit">送出</button>
+    </form>
+    <div class="chat-foot">
+      <button class="btn sm" id="handoffBtn">轉接真人</button>
+      <span class="faint">需要時服務專員會直接在這裡回覆</span>
+    </div>
+  </section>
+
+  <script src="/shared/api.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
